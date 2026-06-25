@@ -1,4 +1,4 @@
 obj/
 bin/
-compiled_commands.json
+compile_commands.json
 .cache/

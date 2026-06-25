@@ -1,0 +1,4 @@
+obj/
+bin/
+compiled_commands.json
+.cache/

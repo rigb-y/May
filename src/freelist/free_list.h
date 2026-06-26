@@ -17,7 +17,7 @@ void block_out(Header*);
 _Bool fl_find(Header*);
 
 void fl_append(Header*);
-void fl_remove(Header**);
+void fl_remove(Header*);
 
 void fl_clear();
 

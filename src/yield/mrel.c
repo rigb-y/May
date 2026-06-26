@@ -13,5 +13,9 @@ void mrel(void* mem) {
         return;
     }
 
+    if (coalesce(&block)) {
+        return;
+    }
+
     fl_append(block);
 }

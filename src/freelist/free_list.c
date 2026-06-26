@@ -21,6 +21,7 @@ void fl_append(Header* block) {
     if (block == NULL) return;
 
     block->next = NULL;
+    block->free = true;
 
     if (free_list.head == NULL) {
         free_list.head = block;
@@ -31,7 +32,6 @@ void fl_append(Header* block) {
     free_list.tail->next = block;
     free_list.tail = block;
 
-    block->free = true;
 }
 
 _Bool fl_find(Header* block) {
@@ -45,25 +45,25 @@ _Bool fl_find(Header* block) {
     return false;
 }
 
-void fl_remove(Header** block) {
-    if (block == NULL || *block == NULL) return;
+void fl_remove(Header* block) {
+    if (block == NULL) return;
 
-    if (!fl_find(*block)) return; 
+    if (!fl_find(block)) return; 
 
-    (*block)->free = false;
+    block->free = false;
 
     // Single element
     if (free_list.head == free_list.tail) {
         free_list.head = NULL;
         free_list.tail = NULL;
-        (*block)->next = NULL;
+        block->next = NULL;
         return;
     }
 
     // If the block we want to remove is the head
-    if (free_list.head == *block) {
+    if (free_list.head == block) {
         free_list.head = free_list.head->next; 
-        (*block)->next = NULL;
+        block->next = NULL;
         return;
     }
 
@@ -71,7 +71,7 @@ void fl_remove(Header** block) {
     Header* curr = free_list.head;
     Header* prev = free_list.head;
     while (curr != NULL) {
-        if (curr == *block) {
+        if (curr == block) {
             curr = curr->next;
             break;
         }
@@ -80,12 +80,12 @@ void fl_remove(Header** block) {
     }
 
     // If the block we want to remove is the tail
-    if (*block == free_list.tail) {
+    if (block == free_list.tail) {
         free_list.tail = prev;
     }
 
     prev->next = curr;
-    (*block)->next = NULL;
+    block->next = NULL;
 }
 
 _Bool fl_empty() {
@@ -106,7 +106,7 @@ Header* fl_first_fit(size_t size) {
             fl_split(size, curr);
         }
 
-        fl_remove(&curr);
+        fl_remove(curr);
         return curr; 
     }
 
@@ -161,7 +161,7 @@ void fl_split(size_t request, Header* block) {
     // We just split the heaps tail. This actually accounts
     // for both cases since the tail will be the head if there is only one block.
     if (block == get_heap_tail()) {
-        move_heap_tail(Hp);
+        move_heap_tail_forward(Hp);
     }
 }
 

@@ -12,11 +12,18 @@
 
 int main(int argc, char** argv) {
 
-    int* mem = mgrant(sizeof(int) + 120);
-    mrel(mem);
-    mem = mgrant(sizeof(int));
+    int* mem1 = mgrant(sizeof(int) + 120);
+    int* mem2 = mgrant(sizeof(int) + 250);
+    mrel(mem2);
 
-    hat_out();
+    int* mem3 = mgrant(sizeof(int) + 250);
+
+    int* mem4 = mgrant(sizeof(int) + 450);
+    mrel(mem4);
+
+    mrel(mem3);
+
+    walk_heap();
 
     return EXIT_SUCCESS;
 }

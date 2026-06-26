@@ -141,7 +141,10 @@ size_t alignup(size_t s) {
 However, it is not enough to round the requested size, we must also round the size of the block header. Call the size of the block header $B$, and consider a situation in which $A\mid s$, but $A\nmid B$. Some rudimentary number theory tells us that
 
 $$
-s = Ak,\ k\in \mathbb{Z}, \\
+s = Ak,\ k\in \mathbb{Z},
+$$
+
+$$
 B = A\ell + r,\ \ell,r \in \mathbb{Z},\ 0 < r < A
 $$
 

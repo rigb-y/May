@@ -19,8 +19,6 @@ _Bool fl_find(Header*);
 void fl_append(Header*);
 void fl_remove(Header*);
 
-void fl_clear();
-
 _Bool fl_empty();
 
 Header* fl_first_fit(size_t);

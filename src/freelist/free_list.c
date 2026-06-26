@@ -10,6 +10,11 @@
 
 FreeList free_list = {0};
 
+/**
+ * @brief Sends the contents of a block to stdout.
+ *
+ * @param block Pointer to a block.
+ */
 void block_out(Header* block) {
     if (block == NULL) return;
     printf("Block: \n\tSize: %zu\n\tFree: %d\n\n",
@@ -18,6 +23,11 @@ void block_out(Header* block) {
     );
 }
 
+/**
+ * @brief Adds a block to the end of the free list.
+ *
+ * @param block Pointer to a block.
+ */
 void fl_append(Header* block) {
     if (block == NULL) return;
 
@@ -32,9 +42,14 @@ void fl_append(Header* block) {
 
     free_list.tail->next = block;
     free_list.tail = block;
-
 }
 
+/**
+ * @brief Checks if a block exists in the free list.
+ *
+ * @param block Pointer to a block.
+ * @return True if found, false otherwise.
+ */
 _Bool fl_find(Header* block) {
     if (block == NULL) return false;
 
@@ -46,6 +61,11 @@ _Bool fl_find(Header* block) {
     return false;
 }
 
+/**
+ * @brief Removes a block from the free list.
+ *
+ * @param block block pointer to a block.
+ */
 void fl_remove(Header* block) {
     if (block == NULL) return;
 
@@ -89,10 +109,22 @@ void fl_remove(Header* block) {
     block->next = NULL;
 }
 
+/**
+ * @brief Checks if the free list is empty.
+ *
+ * @return True if empty, false otherwise.
+ */
 _Bool fl_empty() {
     return (free_list.head == NULL && free_list.tail == NULL);
 }
 
+/**
+ * @brief Finds the first header from the free 
+ * list that is suitable for a request.
+ *
+ * @param size the size of the request.
+ * @return Pointer to the suitable header.
+ */
 Header* fl_first_fit(size_t size) {
     if (fl_empty()) return NULL;
 
@@ -114,12 +146,21 @@ Header* fl_first_fit(size_t size) {
     return NULL;
 }
 
-// Impose a minimum size (M_s) on requestable space, let's call it ALIGNMENT.
-// Call the rounded size of a block (alignup(sizeof(Header))) A_B,
-// block->size u, and rounded requested size alignup(request) Rr. 
-// If Rr + A_B + M_s <= u, then we split the block such that the 
-// first chunk fulfills our rounded request exactly. Then, the second 
-// chunk is a new header + alignment padding + remaining space.
+/**
+ * @brief Checks if a block should be split.
+ *
+ * @param request the size of the memory request.
+ * @param block the header that was found from the free list.
+
+ * @return True if it should be split, false otherwise.
+ *
+ * @note *Impose a minimum size (M_s) on requestable space, let's call it ALIGNMENT.
+ * Call the rounded size of a block (alignup(sizeof(Header))) A_B,
+ * block->size u, and rounded requested size alignup(request) Rr. 
+ * If Rr + A_B + M_s <= u, then we split the block such that the 
+ * first chunk fulfills our rounded request exactly. Then, the second 
+ * chunk is a new header + alignment padding + remaining space.
+ */
 _Bool fl_should_split(size_t request, Header* block) {
     // Ideally this branch will never see daylight
     if (block == NULL) return false;
@@ -130,15 +171,22 @@ _Bool fl_should_split(size_t request, Header* block) {
     );
 }
 
-// If the header H starts at address \ell with size field u, then one past the header
-// sits at \ell + A_B, where A_B = alignup(sizeof(Header)). So, the
-// new header H' sits at \ell + A_B + R(r), where R(r) = alignup(request).
-// The size field for H' should be set as H'->size = u - R(r) - A_B.
-//
-// Note these cases: 
-//      (1) If we split the head of the heap and the head is the only block,
-//          we must move the tail. 
-//      (2) If we split the tail of the heap, we must move the tail.
+/**
+ * @brief Splits a header in two.
+ *
+ * @param request the size of the memory request.
+ * @param block the header that was found from the free list .
+ * 
+ * @note If the header H starts at address \ell with size field u, then 
+ * one past the header sits at \ell + A_B, where A_B = alignup(sizeof(Header)). 
+ * So, the new header H' sits at \ell + A_B + R(r), where R(r) = alignup(request). 
+ * The size field for H' should be set as H'->size = u - R(r) - A_B.
+ * 
+ * Note these cases: 
+ *      (1) If we split the head of the heap and the head is the only block,
+ *          we must move the tail. 
+ *      (2) If we split the tail of the heap, we must move the tail.
+ */
 void fl_split(size_t request, Header* block) {
     // Branch should never see daylight (BSNSD).
     if (block == NULL) return;
@@ -176,6 +224,9 @@ void fl_split(size_t request, Header* block) {
     }
 }
 
+/**
+ * @brief dumps the free list to stdout.
+ */
 void fl_dump() {
     Header* curr = free_list.head;
     while (curr != NULL) {

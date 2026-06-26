@@ -12,10 +12,24 @@
 
 #include <stdio.h>
 
+/**
+ * @brief Rounds a size upward such that it is properly aligned
+ * according to ALIGNMENT (_Alignof(max_align_t)).
+ *
+ * @param x a size to be aligned.
+ * @return The aligned size.
+ */
 size_t alignup(size_t x) {
     return (x + ALIGNMENT - 1) & ~(ALIGNMENT - 1);
 }
 
+/**
+ * @brief Returns heap allocated memory to the caller.
+ *
+ * @param size the size of the request.
+ * @return Pointer to allocated memory or NULL if the 
+ * allocation was not successful.
+ */
 void* mgrant(size_t size) {
     size_t aligned_size = alignup(size);
     size_t total_size = HEADER_ALIGN + aligned_size;

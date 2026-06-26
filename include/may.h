@@ -1,9 +1,9 @@
 #ifndef MAY_MAY_H
 #define MAY_MAY_H
 
-// A simple facade
+#include <stddef.h>
 
-#include "mgrant.h"
-#include "mrel.h"
+void* mgrant(size_t size);
+void mrel(void* mem);
 
 #endif

@@ -9,11 +9,16 @@ CF = -g -std=c23 \
 	  -Isrc/heapman
 
 OBJDIR = obj
-TARGETDIR = bin
-TARGET = may
+TARGETDIR = lib
+TARGET = libmay.a
 
-SRC = src/main.c \
-	  src/alloc/mgrant.c \
+PREFIX ?= /usr/local
+LIBDIR := $(PREFIX)/lib
+INCLUDEDIR := $(PREFIX)/include
+
+INCLUDE := include/may.h
+
+SRC = src/alloc/mgrant.c \
 	  src/yield/mrel.c \
 	  src/block/block.c \
 	  src/freelist/free_list.c \
@@ -23,15 +28,21 @@ OBJ = $(SRC:%.c=$(OBJDIR)/%.o)
 
 .PHONY: clean
 
-ALL: $(TARGET)
+ALL: $(TARGETDIR)/$(TARGET)
 
-$(TARGET): $(OBJ)
+$(TARGETDIR)/$(TARGET): $(OBJ)
 	@mkdir -p $(TARGETDIR)
-	$(CC) $(OBJ) -o $(TARGETDIR)/$(TARGET) 
+	ar rcs $(TARGETDIR)/$(TARGET) $(OBJ) 
 
 $(OBJDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CF) -c $< -o $@
+
+install: $(TARGETDIR)/$(TARGET)
+	install -d $(DESTDIR)$(LIBDIR)
+	install -d $(DESTDIR)$(INCLUDEDIR)
+	install -m 644 $(TARGETDIR)/$(TARGET) $(DESTDIR)$(LIBDIR)/
+	install -m 644 $(INCLUDE) $(DESTDIR)$(INCLUDEDIR)/
 
 clean:
 	rm -rf $(OBJDIR) $(TARGETDIR)

@@ -9,6 +9,13 @@
 static Header* heap_tail = NULL;
 static Header* heap_head = NULL;
 
+/**
+ * @brief Adjusts the global heap_head and heap_tail pointers.
+ *
+ * @param block pointer to a block.
+ *
+ * @note Head and tail (hat).
+ */
 void adjust_hat(Header* block) {
     if (block == NULL) return; 
 
@@ -35,29 +42,63 @@ void adjust_hat(Header* block) {
     move_heap_tail_forward(block);
 }
 
+/**
+ * @brief Returns the heap_tail pointer.
+ *
+ * @return Pointer to heap_tail.
+ */
 Header* get_heap_tail() {
     return heap_tail;
 }
 
+/**
+ * @brief Returns the heap_head pointer.
+ *
+ * @return Pointer to heap_head.
+ */
 Header* get_heap_head() {
     return heap_head;
 }
 
+/**
+ * @brief Checks if heap_head and heap_tail point to the same block.
+ *
+ * @return True / false.
+ */
 _Bool tail_is_head() {
     return get_heap_tail() 
         == get_heap_head();
 }
 
+/**
+ * @brief Moves the heap_tail pointer forward to block.
+ *
+ * @param block pointer to a block.
+ *
+ * @note It should be the case that block is immediately after tail. 
+ */
 void move_heap_tail_forward(Header* block) {
     Header* curr_tail = heap_tail;
     heap_tail = block; 
     heap_tail->prev_phys = curr_tail;
 }
 
+/**
+ * @brief Moves the heap_tail pointer backward to block.
+ *
+ * @param block pointer to a block.
+ *
+ * @note It should be the case that block is immediately before tail. 
+ */
 void move_heap_tail_backward(Header* block) {
     heap_tail = block;
 }
 
+/**
+ * @brief A debug util that sends the contents of both the
+ * heap_head pointer and heap_tail pointer to stdout,
+ * along with their neighbors in physical memory.
+ */
 void hat_out() {
     puts("HEAD:");
     block_out(heap_head);
@@ -79,6 +120,10 @@ void hat_out() {
     }
 }
 
+/**
+ * @brief A debug util that sends the contents of the heap
+ * to stdout.
+ */
 void walk_heap() {
     Header* curr = get_heap_head();
 
@@ -88,6 +133,13 @@ void walk_heap() {
     }
 }
 
+/**
+ * @brief Coalesces a block with its left side physical neighbor if that
+ * neighbor is free.
+ *
+ * @param block address of a pointer to a block.
+ * @return True if coalescing occurred, false otherwise.
+ */
 _Bool coalesce_left(Header** block) {
     if (block == NULL ||
         (*block) == NULL ||
@@ -120,6 +172,13 @@ _Bool coalesce_left(Header** block) {
     return true;
 }
 
+/**
+ * @brief Coalesces a block with its right side physical neighbor if that
+ * neighbor is free.
+ *
+ * @param block address of a pointer to a block.
+ * @return True if coalescing occurred, false otherwise.
+ */
 _Bool coalesce_right(Header** block) {
     if (block == NULL ||
         (*block) == NULL ||
@@ -154,6 +213,12 @@ _Bool coalesce_right(Header** block) {
     return true;
 }
 
+/**
+ * @brief Calls both coalescing functions described above.
+ *
+ * @param block address of a pointer to a block
+ * @return True if coalescing occurred, false otherwise.
+ */
 _Bool coalesce(Header** block) {
     return coalesce_left(block) |
         coalesce_right(block);

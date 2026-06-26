@@ -219,10 +219,7 @@ Impose a minimum size $M_s$ on requestable space. A natural choice for $M_s$ is 
 
  then we split the block.
 
- If a header $H$ starts at address $\ell$ with size field $u$, then 
- one past the header sits at $\ell + A_B$. 
- So, the new header $H^{\prime}$ sits at $\ell + A_B + R_r$. 
- The size field for $H^{\prime}$ is
+ If a header $H$ starts at address $\ell$ with size field $u$, then one past the header sits at $\ell + A_B$. Then, the new header $H^{\prime}$ sits at $\ell + A_B + R_r$. The size field for $H^{\prime}$ is
 
  $$
  u - R_r - A_B
@@ -235,3 +232,7 @@ _____________        ___________________________________
 ^                    ^   ^        ^
 ℓ                    ℓ   ℓ+A_B    ℓ+A_B+R_r
  ```
+
+
+#### Coalescing
+

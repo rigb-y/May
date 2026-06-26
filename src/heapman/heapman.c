@@ -62,21 +62,19 @@ void hat_out() {
     puts("HEAD:");
     block_out(heap_head);
 
-    puts("\nHEAD->NEXT");
-    if (heap_head->next_phys) {
+    if (heap_head) {
+        puts("\nHEAD->NEXT");
         block_out(heap_head->next_phys);
     }
 
     puts("TAIL:");
     block_out(heap_tail);
 
-    puts("\nTAIL->PREV");
-    if (heap_tail->prev_phys) {
+    if (heap_tail) {
+        puts("\nTAIL->PREV");
         block_out(heap_tail->prev_phys);
-    }
 
-    puts("\nTAIL->NEXT");
-    if (heap_tail->next_phys) {
+        puts("\nTAIL->NEXT");
         block_out(heap_tail->next_phys);
     }
 }
@@ -151,10 +149,12 @@ _Bool coalesce_right(Header** block) {
         after_next->prev_phys = *block;
     }
 
+    fl_append(*block);
+
     return true;
 }
 
 _Bool coalesce(Header** block) {
-    return coalesce_left(block) || 
+    return coalesce_left(block) |
         coalesce_right(block);
 }

@@ -11,6 +11,7 @@
 FreeList free_list = {0};
 
 void block_out(Header* block) {
+    if (block == NULL) return;
     printf("Block: \n\tSize: %zu\n\tFree: %d\n\n",
         block->size,
         block->free
@@ -153,6 +154,16 @@ void fl_split(size_t request, Header* block) {
     init_header(Hp, remaining_space);
     
     fl_append(Hp);
+
+    Header* save_block_next_phys = block->next_phys;
+
+    block->next_phys = Hp;
+    Hp->prev_phys = block;
+    Hp->next_phys = save_block_next_phys;
+
+    if (save_block_next_phys != NULL) {
+        save_block_next_phys->prev_phys = Hp;
+    }
 
     if (tail_is_head()) {
         get_heap_head()->next_phys = Hp; 

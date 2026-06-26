@@ -124,7 +124,7 @@ $$
 s^{\prime} \equiv 0 \pmod{A}.
 $$
 
-In other words `s' % A == 0` (or `s' & (A-1) == 0`) for the enlightened reader. To be precise,
+In other words `s' % A == 0` (or `s' & (A-1) == 0` for the enlightened reader). To be precise,
 
 $$
 s^{\prime} = \min\{\lambda \geq s : \lambda \equiv 0 \pmod{A}\}

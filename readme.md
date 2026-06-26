@@ -165,7 +165,7 @@ That is, $B+s \not\equiv 0 \pmod{A}$, so $(B+s)$ %  $A \ne 0$, and $B+s$ is not 
 If both $B$ and $s$ both have remainder zero when divided by $A$, then
 
 $$
-A\mid B \; \land \; A\mid s
+A\mid B \ \land \ A\mid s
 ,$$
 
 so 
@@ -212,9 +212,11 @@ Impose a minimum size $M_s$ on requestable space. A natural choice for $M_s$ is 
  and rounded requested size `alignup(r)` $R_{r}$. 
 
  If 
+
  $$
  R_r + A_B + M_s \leq u
  ,$$
+
  then we split the block.
 
  If a header $H$ starts at address $\ell$ with size field $u$, then 

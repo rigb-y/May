@@ -160,7 +160,7 @@ $$
 A \mid B+s
 .$$
 
-That is, $B+s \not\equiv 0 \pmod{A}$, so $(B+s)\; \%\;  A \ne 0$, and $B+s$ is not properly aligned.
+That is, $B+s \not\equiv 0 \pmod{A}$, so $(B+s)$ %  $A \ne 0$, and $B+s$ is not properly aligned.
 
 If both $B$ and $s$ both have remainder zero when divided by $A$, then
 

@@ -3,6 +3,7 @@
 #include "mgrant.h"
 #include "free_list.h"
 #include "block.h"
+#include "heapman.h"
 
 #include <unistd.h>
 #include <stdint.h>
@@ -35,6 +36,9 @@ void* mgrant(size_t size) {
 
     block = raw_memory;
     init_header(block, aligned_size);
+    block->prev_phys = get_heap_tail();
+
+    adjust_hat(block);
 
     return (void*)((char*)block + HEADER_ALIGN);
 }

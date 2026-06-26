@@ -8,6 +8,9 @@ typedef struct Header {
     size_t size;
     _Bool free;
     struct Header* next;
+
+    struct Header* prev_phys,
+                 * next_phys;
 } Header;
 
 void init_header(Header*, size_t);

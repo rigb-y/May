@@ -5,7 +5,8 @@ CF = -g -std=c23 \
 	  -Isrc/alloc \
 	  -Isrc/yield \
 	  -Isrc/block \
-	  -Isrc/freelist
+	  -Isrc/freelist \
+	  -Isrc/heapman
 
 OBJDIR = obj
 TARGETDIR = bin
@@ -15,7 +16,8 @@ SRC = src/main.c \
 	  src/alloc/mgrant.c \
 	  src/yield/mrel.c \
 	  src/block/block.c \
-	  src/freelist/free_list.c
+	  src/freelist/free_list.c \
+	  src/heapman/heapman.c
 
 OBJ = $(SRC:%.c=$(OBJDIR)/%.o)
 

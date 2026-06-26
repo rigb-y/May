@@ -1,5 +1,6 @@
 #include "may.h"
 #include "free_list.h"
+#include "heapman.h"
 
 #include <stdio.h>
 #include <stddef.h>
@@ -10,30 +11,12 @@
 #include <stdlib.h>
 
 int main(int argc, char** argv) {
-    int* mem = mgrant(sizeof(int));
+
+    int* mem = mgrant(sizeof(int) + 120);
     mrel(mem);
+    mem = mgrant(sizeof(int));
 
-    *mem = 15;
-    printf("%d\n", *mem);
-
-    mrel(mem);
-    mem = NULL;
-
-    int* mem2 = mgrant(sizeof(int));
-
-    *mem2 = 25;
-    printf("%d\n", *mem2);
-
-    int* mem3 = mgrant(sizeof(int));
-
-    *mem3 = 30;
-    printf("%d\n", *mem3);
-
-    double* mem4 = mgrant(sizeof(double));
-
-    *mem4 = 30.0f;
-    printf("%.2f\n", *mem4);
-
+    hat_out();
 
     return EXIT_SUCCESS;
 }

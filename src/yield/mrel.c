@@ -1,6 +1,7 @@
 #include "mrel.h"
 #include "block.h"
 #include "free_list.h"
+#include "heapman.h"
 #include "mgrant.h"
 
 void mrel(void* mem) {
@@ -12,6 +13,5 @@ void mrel(void* mem) {
         return;
     }
 
-    block->free = true;
     fl_append(block);
 }

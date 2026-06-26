@@ -94,6 +94,8 @@ Once allocated memory is relinquished, it should be added to the free list. When
 
 Note that freeing memory is as simple as recovering the block header, setting the `free` flag to  false, and adding the block to the free list.
 
+Recall that in the block structure we maintain a pointer `next`. If we implement the free list as a linked list of Blocks, then this `next` pointer can be used to chain together free blocks in the free list.
+
 ##### Procuring blocks from the free list
 
 We can use one of:
@@ -248,3 +250,21 @@ ______________________________________________________________________________
     ______________________________________________________________________________
 ```
 
+For any block $B$, getting the address of where its right side neighbor would be (if it existed) is a trivial exercise. We stated above that if a block header sits at address $\ell$, then the address of the next header is $\ell + A_B + R_r$, where $A_B$ is the rounded size of a block header, and $R_r$ is the size of the usable space that the block prefixes. 
+
+However, getting its left neighbor is more difficult. We cannot know just from the information in $B$ where the previous header $B_P$ sits, since that would require knowing how large the useable space that $B_P$ prefixes is.
+
+If all blocks $B$ maintain a pointer to both its left and right neighbors in the arena, then coalescing becomes far easier. A Block structure is now
+
+```C
+typedef struct Block {
+    size_t size;
+    _Bool free;
+
+    // For use in the free list
+    struct Block* next;
+
+    Struct Block* prev_phys,
+                * next_phys;
+} Block;
+```

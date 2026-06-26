@@ -179,7 +179,7 @@ Therefore, both $B$ and $s$ must be rounded.
 
 #### Recovering the block header
 
-Given a pointer $p$ to memory that was returned by the allocator to the user, the block header is recovered via
+Given a pointer $p$ to memory that was returned by the allocator, the block header is recovered via
 
 ```C
 (Block*)((char*)p - ALIGNED_HEADER_SIZE);

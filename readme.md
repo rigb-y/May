@@ -80,9 +80,9 @@ typedef struct Block {
 The heap arena is then logically partitioned in the following way
 
 ```
-------------------------------------------------
+________________________________________________
 | Block | useable space | Block | usable space | . . .
-------------------------------------------------
+________________________________________________
 
 ```
 
@@ -105,9 +105,128 @@ We can use one of:
 
 **Note**: May currently uses *first-fit* (for the time being).
 
-##### Fragmentation
+#### Fragmentation
 
 * **Internal fragmentation**: A block was allocated that is bigger than the requested size, so space goes unused.
 * **External fragmentation**: There exists enough total memory to fulfill the request, but it is scattered amongst blocks that are too small for the request.
 
-###
+#### Address aligning
+
+In order to guarantee that addresses are properly aligned to the hardware's liking, we must ensure that request sizes are rounded up to the nearest boundary. But, which boundary do we use? In C we can use `max_align_t`, which is given by `stddef.h` and represents a type with the largest alignment requirement of any type. So,
+
+```C
+size_t A = _Alignof(max_align_t);
+```
+
+gives us that alignment. We can then create a simple function that takes a size $s$ and rounds it to $s^{\prime}$ such that
+
+$$
+s^{\prime} \equiv 0 \pmod{A}.
+$$
+
+In other words `s' % A == 0` (or `s' & (A-1) == 0`) for the enlightened reader. To be precise,
+
+$$
+s^{\prime} = \min\{\lambda \geq s : \lambda \equiv 0 \pmod{A}\}
+$$
+
+The function is simply
+
+```C
+size_t alignup(size_t s) {
+    return (s + A-1) & ~(A-1);
+}
+```
+
+However, it is not enough to round the requested size, we must also round the size of the block header. Call the size of the block header $B$, and consider a situation in which $A\mid s$, but $A\nmid B$. Some rudimentary number theory tells us that
+
+$$
+\begin{align*}
+s &= Ak,\; k\in \mathbb{Z}, \\
+B &= A\ell + r,\; \ell,r \in \mathbb{Z},\; 0 < r < A
+.\end{align*}
+$$
+So,
+
+$$
+B + s = Ak + A\ell + r = A(k+\ell) + r
+$$
+
+Hence, we see that it is not the case that  
+
+$$
+A \mid B+s
+.$$
+
+That is, $B+s \not\equiv 0 \pmod{A}$, so $(B+s)\; \%\;  A \ne 0$, and $B+s$ is not properly aligned.
+
+If both $B$ and $s$ both have remainder zero when divided by $A$, then
+
+$$
+A\mid B \; \land \; A\mid s
+,$$
+
+so 
+
+$$
+A \mid B + s
+.$$
+
+Therefore, both $B$ and $s$ must be rounded.
+
+
+#### Recovering the block header
+
+Given a pointer $p$ to memory that was returned by the allocator to the user, the block header is recovered via
+
+```C
+(Block*)((char*)p - ALIGNED_HEADER_SIZE);
+```
+
+#### Splitting blocks
+
+Consider a case in which we have a free block that describes a $256$ byte region of the heap arena.
+
+```
+______________________
+| Header | 256 bytes |
+______________________
+```
+
+But, suppose that a caller requests only 16 bytes. It would be unwise to hand over  this entire 256 byte chunk. Instead, we can split the chunk into two distinct blocks. The first chunk fulfills the request exactly (after rounding). Then, the second chunk a new block header followed by the remaining space.
+
+```
+_________________________________________________
+| Header | 16 bytes  | Header | remaining space |
+_________________________________________________
+```
+
+The first chunk is what is returned by the allocator to fulfil the 16 byte request.
+
+Suppose a user requests $r$ bytes, and the `first-fit` protocol finds a block of size $u$.
+
+Impose a minimum size $M_s$ on requestable space. A natural choice for $M_s$ is the size of the alignment criteria $A$.
+ Call the rounded size of a block `alignup(sizeof(Block))` $A_B$,
+ and rounded requested size `alignup(r)` $R_{r}$. 
+
+ If 
+ $$
+ R_r + A_B + M_s \leq u
+ ,$$
+ then we split the block.
+
+ If a header $H$ starts at address $\ell$ with size field $u$, then 
+ one past the header sits at $\ell + A_B$. 
+ So, the new header $H^{\prime}$ sits at $\ell + A_B + R_r$. 
+ The size field for $H^{\prime}$ is
+
+ $$
+ u - R_r - A_B
+ .$$
+
+ ```latex
+________________________________
+ | H | \(R_r\) | H' | u - R_r - A_B |
+ ________________________________
+ ℓ
+ ```

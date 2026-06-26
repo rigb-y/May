@@ -1,6 +1,8 @@
 #ifndef MAY_MGRANT_H
 #define MAY_MGRANT_H
 
+#include "block.h"
+
 #include <stddef.h>
 
 typedef struct Header Header;

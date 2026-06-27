@@ -1,10 +1,56 @@
-> May is a memory allocator written in C utilizing the classic system call wrapper `sbrk` to extend the program break.
+> May is a memory allocator written in C utilizing the classic Unix `sbrk` interface to extend the program break.
 The public interface for May consists of two calls: `mgrant` to grant memory to the user, and `mrel` to 
 relinquish that memory when use is complete.
+
+#### Building May
+
+May's ```makefile``` creates a static library file ```lib/libmay.a```.
+
+To use it, link a C file against the library.
+
+```
+.
+├── libmay.a
+├── main.c
+└── may.h
+```
+
+```c
+// main.c
+
+#include "may.h"
+
+int main(int argc, char** argv) { int* p = mgrant(sizeof(int)); ... }
+```
+
+```
+gcc -c main.c -o main.o
+gcc main.o -L. -lmay -o bin
+```
+
+Running ```sudo make install``` will install the library `libmay.a` at `/usr/local/lib`, and the header `may.h` at `/usr/local/include`. An optional argument `DESTDIR` can be used to modify these install paths. For example, 
+```
+sudo make install DESTDIR=$HOME/tmp/
+```
+
+installs `$HOME/tmp/usr/local/lib/libmay.a` and `$HOME/tmp/usr/local/include/may.h`. In any case, permissions of  644 (rw--r--r) are set on both files.
+
+After installing, using the library becomes simpler.
+
+```
+.
+├── main.c
+```
+
+```
+gcc -c main.c -o main.o
+gcc main.o -lmay -o bin
+```
   
 
 #### Allocating memory
 Users in need of runtime allocated memory can call `mgrant` (memory grant).
+
 ```C
 void* mgrant(size_t request);
 ```
@@ -19,7 +65,7 @@ Users no longer in need of their `mgrant` allocated memory can call `mrel` (memo
 void mrel(void* mem);
 ```
 
-Calling `mrel` on both `NULL` and `nullptr` is a perfectly safe operation. Calling `mrel` on memory already freed is a `nop`.
+Calling `mrel` on both `NULL` and `nullptr` is a perfectly safe operation. Calling `mrel` on memory already freed is not a safe operation.
 
 ---
 
@@ -51,7 +97,7 @@ High addresses
 Low addresses
 ```
 
-Initially the program break sits just after the space for initialized static / globals (.bss). `sbrk` allows us to move this marker, effectively increasing the size of the heap arena.
+Initially the program break typically sits just after the space for zero initialized / uninitialized static / globals (.bss). `sbrk` allows us to move this marker, effectively increasing the size of the heap arena.
 
 ```c
 void* sbrk(intptr_t inc);
@@ -81,18 +127,18 @@ The heap arena is then logically partitioned in the following way
 
 ```
 ________________________________________________
-| Block | useable space | Block | usable space | . . .
+| Block | usable space | Block | usable space | . . .
 ________________________________________________
 
 ```
 
-The `size` field indicates how many useable bytes follow the header. The `free` flag indicates whether or not the block is in use.
+The `size` field indicates how many usable bytes follow the header. The `free` flag indicates whether or not the block is in use.
 
 #### Free list
 
 Once allocated memory is relinquished, it should be added to the free list. When memory requests are initiated, the allocator checks the free list to see if the request can be fulfilled without allocating new memory.
 
-Note that freeing memory is as simple as recovering the block header, setting the `free` flag to  false, and adding the block to the free list.
+Note that freeing memory is as simple as recovering the block header, setting the `free` flag to true, and adding the block to the free list.
 
 Recall that in the block structure we maintain a pointer `next`. If we implement the free list as a linked list of Blocks, then this `next` pointer can be used to chain together free blocks in the free list.
 
@@ -246,13 +292,13 @@ ______________________________________________________________________________
 ______________________________________________________________________________
 
     ______________________________________________________________________________
- => | B |                               space                                    |
+ => | B' |                               space                                    |
     ______________________________________________________________________________
 ```
 
 For any block $B$, getting the address of where its right side neighbor would be (if it existed) is a trivial exercise. We stated above that if a block header sits at address $\ell$, then the address of the next header is $\ell + A_B + R_r$, where $A_B$ is the rounded size of a block header, and $R_r$ is the size of the usable space that the block prefixes. 
 
-However, getting its left neighbor is more difficult. We cannot know just from the information in $B$ where the previous header $B_P$ sits, since that would require knowing how large the useable space that $B_P$ prefixes is.
+However, getting its left neighbor is more difficult. We cannot know just from the information in $B$ where the previous header $B_P$ sits, since that would require knowing how large the usable space that $B_P$ prefixes is.
 
 If all blocks $B$ maintain a pointer to both its left and right neighbors in the arena, then coalescing becomes far easier. A Block structure is now
 
@@ -264,7 +310,11 @@ typedef struct Block {
     // For use in the free list
     struct Block* next;
 
-    Struct Block* prev_phys,
+    struct Block* prev_phys,
                 * next_phys;
 } Block;
 ```
+
+#### Alignment Theory
+
+To conclude this discussion on allocators, I will attempt to explain the theory behind the alignment math.

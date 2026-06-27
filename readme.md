@@ -331,7 +331,7 @@ $$
         +\lambda_{\log_{2}(A)-2}2^{\log_{2}(A)-2} + \ldots + \lambda_{1}2^{1} + \lambda_{0}2^{0}
 .$$
 
-Note that $\lambda_{i} \in \left\{0,1\right\}$. Observe that
+Note that $\lambda_{i} \in \{0,1\}$. Observe that
 
 $$
 A = \lambda_{\log_{2}(A)}2^{\log_{2}(A)}

@@ -343,7 +343,7 @@ $$
 \lambda_{\log_{2}(A)+k}2^{\log_{2}(A) + k}
 $$
 
-for $k \in \mathbb{Z}$, and $\log_{2}(A)+k \leq n$. Observe that if $\lambda_{\log_{2}{(A)}+k} = 1$,
+for $k \in \mathbb{Z}$, $k>0$, and $\log_{2}(A)+k \leq n$. Observe that if $\lambda_{\log_{2}{(A)}+k} = 1$,
 
 $$
 \frac{2^{\log_{2}{(A)}+k}}{2^{\log_{2}{(A)}}} = 2^{k} \in \mathbb{Z}
@@ -361,7 +361,7 @@ $$
 \lambda_{\log_{2}{(A) - j}}2^{\log_{2}{(A)-j}} 
 $$
 
-have $\lambda_{\log_{2}{(A)-j}} =0$, since none of these terms are divisible by $A$. Note that $j \in \mathbb{Z}_{> 0}$ and $\log_{2}{(A) - j} \geq 0$
+have $\lambda_{\log_{2}{(A)-j}} =0$, since none of these terms are divisible by $A$. Note that $j \in \mathbb{Z}$, $j>0$, and $\log_{2}{(A) - j} \geq 0$
 
 This is precisely why the check
 

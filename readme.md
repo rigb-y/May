@@ -318,3 +318,71 @@ typedef struct Block {
 #### Alignment Theory
 
 To conclude this discussion on allocators, I will attempt to explain the theory behind the alignment math.
+
+Consider a number $a$ and an alignment $A$. In base two,
+
+$$
+    a = \lambda_{n}2^{n} + \lambda_{n-1}2^{n-1} + \ldots + \lambda_{\ell}2^{\ell} + \ldots  
+$$
+$$
+        + \lambda_{\log_{2}(A)}2^{\log_{2}(A)} + \lambda_{\log_{2}(A)-1}2^{\log_{2}(A)-1} 
+$$
+$$
+        +\lambda_{\log_{2}(A)-2}2^{\log_{2}(A)-2} + \ldots + \lambda_{1}2^{1} + \lambda_{0}2^{0}
+.$$
+
+Note that $\lambda_{i} \in \left\{0,1\right\}$. Observe that
+
+$$
+A = \lambda_{\log_{2}(A)}2^{\log_{2}(A)}
+$$
+
+when $\lambda_{\log_{2}(A)} = 1$. Further observe that all terms that come before this term are divisible by $A$. These terms are in the form
+
+$$
+\lambda_{\log_{2}(A)+k}2^{\log_{2}(A) + k}
+$$
+
+for $k \in \mathbb{Z}_{>0}$, and $\log_{2}(A)+k \leq n$. Observe that if $\lambda_{\log_{2}{(A)}+k} = 1$,
+
+$$
+\frac{2^{\log_{2}{(A)}+k}}{2^{\log_{2}{(A)}}} = 2^{k} \in \mathbb{Z}
+,$$
+
+and if $\lambda_{\log_{2}{(A) + k}} = 0$,
+
+$$
+\frac{0}{2^{\log_{2}{(A)}}} = 0 
+.$$
+
+Thus, $a$ will only have a remainder after being divided by $A$  when all terms of the form
+
+$$
+\lambda_{\log_{2}{(A) - j}}2^{\log_{2}{(A)-j}} 
+$$
+
+have $\lambda_{\log_{2}{(A)-j}} =0$, since none of these terms are divisible by $A$. Note that $j \in \mathbb{Z}_{>0}$ and $\log_{2}{(A) - j} \geq 0$
+
+This is precisely why the check
+
+```c
+a & (A-1) == 0
+```
+
+Checks if $a$ has remainder zero when divided by $A$. Now, consider
+
+```
+~(A-1) 
+```
+
+This is the $n$ bit number with all terms greater than or equal to $2^{\log_{2}{(A)}}$ non zero, and all terms less than $2^{\log_{2}{(A)}}$ zero. In essence, all bits left of and including the $(\log_{2}{(A)} + 1)$th bit are one, and all bits to the right are zero. For example, take $A = 16$, then 
+
+$$
+\sim(A - 1) = \sim(15) = 0b1111\ldots11110000
+$$
+
+Here $\log_2{(16)}  =4$, observe the bit pattern.
+
+So, the bitwise and of a number $a$ with this mask turns off those bottom four bits. Since we removed the bits that would cause a remainder when we take $a$ divided by $A$, we rounded $a$ down to the nearest boundary such that it is $A$ aligned.
+
+Now, adding $A-1$ to $a$ moves the address such that it is inside the next highest boundary, then we take the bitwise and of the negation of the alignment -1 (see above). This rounds it down to the bottom of that next highest boundary. Thus, a round up of the original boundary.
